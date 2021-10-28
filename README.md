@@ -5,7 +5,7 @@ Physical Verification using Skywater 130nm technology - VSD IAT workshop
 
 This workshop was offered by https://www.vlsisystemdesign.com/vsd-iat/ and held 20211026-31
 ------------
-#TOC
+#toc
 
 ------------
 # Day1 - Intro
@@ -56,6 +56,39 @@ Steps to installing the SKY130 PDK on your machine
 ![image](https://user-images.githubusercontent.com/93275755/139153338-a00b03b4-ffb3-4236-83ba-3379da418eaa.png)
 
  
-
 -------------------
+
+/usr/share/PDK - home of Skywater PDKs
+
+project files and directories of your own projects:
+
+![image](https://user-images.githubusercontent.com/93275755/139153865-c1deca0d-ba5a-4a49-a75c-b926a496aa18.png)
+
+-------------
+
+## Skywater PDK + Layers
+
+SKY130 is a 180/130 hybrid with many devices having a 150nm feature size
+
+Cross Section
+![image](https://user-images.githubusercontent.com/93275755/139154485-91db7f5f-cc31-46c8-bb72-4fd4bfeb2c72.png)
+
+![image](https://user-images.githubusercontent.com/93275755/139154643-97487a30-2aa1-48e2-a855-f0518a3c13f6.png)
+
+front emd layers - note the diff and tab specialty here:
+![image](https://user-images.githubusercontent.com/93275755/139154786-7c78fd8c-2870-49f8-939c-824697335751.png)
+![image](https://user-images.githubusercontent.com/93275755/139154933-9b52611f-f2d2-48bb-8385-76bf5d258b63.png)
+
+MIMCAPs
+
+RDL Layer (3rd party wafer-level processing) 4u Cu
+![image](https://user-images.githubusercontent.com/93275755/139155251-0ebec190-59b0-4bd9-81a8-8477e81b3230.png)
+
+2nd RDL layer for UBM:
+![image](https://user-images.githubusercontent.com/93275755/139155548-c340a345-e3bb-42d6-9b46-656e12a798f6.png)
+
+
+
+
+
 
