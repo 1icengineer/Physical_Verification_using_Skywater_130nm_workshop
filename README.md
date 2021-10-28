@@ -307,20 +307,68 @@ will use the terminal as console without starting their own console windows
 
 7. the other tools running in batch mode  
 
-* netgen: `netgen -batch source test.tcl`  
+* `netgen -batch source test.tcl`  
 ![image](https://user-images.githubusercontent.com/93275755/139242251-7449768d-f7a8-4861-9793-15a3559e8822.png)
 
-* xschem  `xschem --tcl test.tcl -q`  
+* `xschem --tcl test.tcl -q`  
 throws an error on the test.tcl since it does not understand `quit` which is part of the tcl extension in magic  
 
 ![image](https://user-images.githubusercontent.com/93275755/139242751-7155e991-7465-4236-9ce4-ab11a28a6d08.png)
 
-* ngspice `ngspice -b`  
-not that ngspice does not understand tcl  
+* `ngspice -b`  
+note that ngspice does not understand tcl  
 
 ---
 
 ### PV_D1SK2_L2 - Creating Sky130 Device Layout In Magic
+
+First create a local project directory structure with links to the pdk init files for the apps needed:
+
+<pre><font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course</b></font>$ mkdir inverter
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course</b></font>$ cd inverter/
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter</b></font>$ mkdir xschem
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter</b></font>$ mkdir mag
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter</b></font>$ mkdir netgen
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter</b></font>$ cd xschem/
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter/xschem</b></font>$ ln -s /usr/share/pdk/sky130A/libs.tech/xschem/xschemrc 
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter/xschem</b></font>$ ln -s /usr/share/pdk/sky130A/libs.tech/ngspice/spinit .spiceinit
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter/xschem</b></font>$ cd ../mag/
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter/mag</b></font>$ ln -s /usr/share/pdk/sky130A/libs.tech/magic/sky130A.magicrc .magicrc
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter/mag</b></font>$ cd ../netgen/
+<font color="#8AE234"><b>thorsten@icdesign-workshop</b></font>:<font color="#729FCF"><b>~/course/inverter/netgen</b></font>$ ln -s /usr/share/pdk/sky130A/libs.tech/netgen/sky130A_setup.tcl setup.tcl
+</pre>
+
+
+![image](https://user-images.githubusercontent.com/93275755/139288164-507550ca-d3eb-45ed-b4f7-7208f9e2b3c2.png)
+
+---
+
+Switch to the xschem directory and launch xschem to verify it loads pdk devices:  
+
+![image](https://user-images.githubusercontent.com/93275755/139289383-f3f413b4-f8ef-498e-8b82-bc0542ce1188.png)
+
+This is one of the example designs / testbenches from the pdk. Select first via LMB click and then hit "e" to enter and crtrl-e to return from here:    
+
+![image](https://user-images.githubusercontent.com/93275755/139292023-8d94046a-fbd4-44c4-82ee-3c37cf18cac8.png)
+
+
+BTW: a number of established hotkeys from virtuoso are working here as well... Q etc ;-)
+
+
+Now checking the `magic` setup and pdk plugins:  
+
+![image](https://user-images.githubusercontent.com/93275755/139297992-c67888ec-6fd3-4bc6-805f-8ff9b1097968.png)
+
+Note that the pdk context is now loaded and process-related info like layers are now shown and selectable.
+
+For enhanced graphics, try `magic -d XR` for cairo-based graphics or`magic -d OGL` for openGL
+
+----
+
+click on Devices1 and place a MOSFET with these sample properties:
+
+![image](https://user-images.githubusercontent.com/93275755/139312518-a9a791f7-cc83-4f4c-b1cd-8b2366f0b156.png)
+
 
 
 
