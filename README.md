@@ -7,14 +7,14 @@ This workshop was offered by https://www.vlsisystemdesign.com/vsd-iat/ and held 
 ------------
 
 ## Course Curriculum
-Day 1: Introduction to Sky130
+**Day 1: Introduction to Sky130**
 
     Introduction to Skywater PDK
     Opensource EDA Tools
     Understanding Skywater PDK
     Opensource Tools And Flows
 
-Day 2: DRC/LVS Theory
+**Day 2: DRC/LVS Theory**
 
     Understanding GDS Format
     Extraction Commands, Styles and Options In Magic
@@ -26,7 +26,7 @@ Day 2: DRC/LVS Theory
     LVS Setup For Netgen
     Verification By XOR
 
-Day 3: Frontend & Backend DRC
+**Day 3: Frontend & Backend DRC**
 
     Introduction To Basic Silicon Manufacturing Process
     Backend Metal Layer Rules
@@ -36,7 +36,7 @@ Day 3: Frontend & Backend DRC
     Device Rules
     Miscellaneous Rules Latch-up Antenna Stress Rules
 
-Day 4: PNR and Physical Verification
+**Day 4: PNR and Physical Verification**
 
     The OpenLANE Flow
     RTL2GDS For Demo Design
@@ -45,7 +45,7 @@ Day 4: PNR and Physical Verification
     Techniques To Avoid Common DRC Errors
     Techniques To Manually Fix Violations
 
-Day 5: Running LVS
+**Day 5: Running LVS**
 
     Physical Verification Of Extracted Netlist
     How LVS Matching Works
@@ -75,17 +75,17 @@ Skywater fab in Bloomington, Mn is  owned and run by SkyWater Technology publicl
 Google and Skywater teamed up to provide a free and open source Process Design Kit (PDK), making it possible for the first time, to work off libraries and setups for open source tools build around a real manufacturable process, which can be used to fabricate real designs at SkyWater's facility.
 
 In collaboration with efabless, this foundry also offers free silicon shuttles. Free as in zero dollars paid - best deal in town right now!
-![image](https://user-images.githubusercontent.com/93275755/139150767-f6c73ec1-66cf-4cf1-aca0-5045eef7b9af.png)
+
+![image](https://user-images.githubusercontent.com/93275755/139271371-32fe3285-9f40-44ed-a3f3-755e9f6a182c.png)
 
 
 ----------
 
-Key Skywater PDK repositories and components:
+### Key Skywater PDK repositories and components:
 1. Documentation: https://skywater-pdk--136.org.readthedocs.build/
 2. PDK Library and files: https://github.com/google/skywater-pdk
 3. Community on slack: https://join.skywater.tools/
 
-![image](https://user-images.githubusercontent.com/93275755/139152062-4eed8cc3-b385-485f-9e94-e72bfc768654.png)
 
 --------------
 ### Open Source Tools
@@ -102,27 +102,48 @@ Steps to installing the SKY130 PDK on your machine
 
 ----
 
- OpenSource tools supported by open_pdks:
- Magic VLSI - Layout Editor
- Klayout - GDS Editor
- openlane - synthesis, p&r based on openroad
- xschem - schematic editor
- netgen - lvs
- ngspice - berkeley spice derivative
- iverilog, irsim, qflow, xcircuit
+**OpenSource tools supported by open_pdks:**
+* Magic VLSI - Layout Editor
+* Klayout - GDS Editor
+* openlane - synthesis, p&r based on openroad
+* xschem - schematic editor
+* netgen - lvs
+* ngspice - berkeley spice derivative
+* iverilog, irsim, qflow, xcircuit
  
  ----
- Library setup and structure
-![image](https://user-images.githubusercontent.com/93275755/139153338-a00b03b4-ffb3-4236-83ba-3379da418eaa.png)
+**Library setup and structure**
+ 
+*Digital Standard Cells*
+ 
+![image](https://user-images.githubusercontent.com/93275755/139273576-bcffc3bb-4ea8-4241-a8fe-5dcddd216b16.png)
+
+*Primitive Devices / Analog*
+
+![image](https://user-images.githubusercontent.com/93275755/139273803-3ba695de-39d9-4cfb-b357-503b84f81fad.png)
+
+*I/O Cells*
+
+![image](https://user-images.githubusercontent.com/93275755/139273917-9c3ebcd6-5f7c-4fc0-a46e-fc0ac3223e0e.png)
+
+*3rd Party Cells*
+
+![image](https://user-images.githubusercontent.com/93275755/139274200-ea55410a-d26d-467d-a5a5-fd4393545e41.png)
+
 
  
 -------------------
 
-/usr/share/PDK - home of Skywater PDKs
+**/usr/share/PDK - home of Skywater PDKs**
 
 project files and directories of your own projects:
 
-![image](https://user-images.githubusercontent.com/93275755/139153865-c1deca0d-ba5a-4a49-a75c-b926a496aa18.png)
+![image](https://user-images.githubusercontent.com/93275755/139274616-963b9a28-4eee-4830-9f59-d00de6a8b1fb.png)
+
+Creaate your own subdirectories for the different design parts or views.
+Link back to the init-files like 
+`.magicrc` pointing to `sky130A.magicrc` 
+Alternatively, create local copies to change default settings while leaving the PDK files unchanged.
 
 -------------
 
@@ -130,80 +151,104 @@ project files and directories of your own projects:
 
 SKY130 is a 180/130 hybrid with many devices having a 150nm feature size
 
-*Process Cross Section*
+**Process Cross Section**
+
 higher level of  detail shown here than included in PDK. 
 Some layers are derived from gds streamed out to foundry.
 ![image](https://user-images.githubusercontent.com/93275755/139154485-91db7f5f-cc31-46c8-bb72-4fd4bfeb2c72.png)
 
-*Backend Layers*
+**Backend Layers**
+
 contained in PDK cover contact, M1..M5:
 ![image](https://user-images.githubusercontent.com/93275755/139154643-97487a30-2aa1-48e2-a855-f0518a3c13f6.png)
 
-*Front emd layers*
+**Front emd layers**
+
 Note the diffusion and tap specialty here:
 Diffusion (n/p) are heavily doped regions for eg source/drain region forming, 
 while tap (n/p) are less heavily doped contacts to well regions 
+
 ![image](https://user-images.githubusercontent.com/93275755/139154786-7c78fd8c-2870-49f8-939c-824697335751.png)
 ![image](https://user-images.githubusercontent.com/93275755/139154933-9b52611f-f2d2-48bb-8385-76bf5d258b63.png)
 
-*MIMCAPs*
+**MIMCAPs**
+
 single/double mimcap can be placed between M5-M4 and M4-M3. Stacking selectable.
 
-*RDL Layer / Redistribution Layer* 
+**RDL Layer / Redistribution Layer**
+
 This is from a 3rd party wafer-level processing company offering a 4um Cu layer for WLCSP packages:
+
 ![image](https://user-images.githubusercontent.com/93275755/139155251-0ebec190-59b0-4bd9-81a8-8477e81b3230.png)
 
-2nd RDL layer for UBM and bump placement:
-![image](https://user-images.githubusercontent.com/93275755/139155548-c340a345-e3bb-42d6-9b46-656e12a798f6.png)
+**2nd RDL layer for UBM and bump placement:**
+
+![image](https://user-images.githubusercontent.com/93275755/139277365-1fa97ef6-c067-48cb-a090-e400949ad4ed.png)
+
 
 ### Devices
 
-*MOSFETs*
+**MOSFETs**
+
 nMOS and pMOS devices with thin/thick oxide availble. 
 ThinOx for VGSmax=2V, ThickOx for VGSmax=5V. 
 Designrules call for 1.8/3.3V 
 
-*BJTs*
+**BJTs**
+
 * vertical npn with high gain made of n-well & deep-n-well, p-well, n-diffusion -> fully isolated devices. 
 * pnp with low gain made of p-diffusion, n-well, substrate -> collector always tied to ground 
 
-*polysilicon resistors*
+**polysilicon resistors**
+
 * p+ with 1kOhms/square
 * p- with 2kOhms/square
 
-*diffusion resistors*
+**diffusion resistors**
+
 p and n diffusion resistor types available. Need well contacts around them for isolation. Large footprint
 
-*implanted resistor*
+**implanted resistor**
+
 pwell resistor
 
-*Device widths*
+**Device widths**
+
 discrete device contact widths are being used in the PDK: 0.35 / 0.69 / 1.41 / 2.85 / 5.73um width
 
-*Device configurations*
+**Device configurations**
+
 MOSFETs come in predefined coonfigurations for number of source/gate/drain fingers.
 No free choice of eg gate fingers allowed for simplification and model accuracy.
 
 ### Libraries
-*sky130_fd_sc_hd* most commonly used lib 
+
+**sky130_fd_sc_hd**  
+most commonly used lib 
 130nm foundry-supplied (fd) standard cell (sc), high density (hd) variant
 
-cell example: *sky130_fd_sc_hd__nor2_2* - final 2 designates fan-out
+cell example: **sky130_fd_sc_hd__nor2_2** - final digit "2" designates fan-out level
 
+*Note*  
 Almost no user-documentation available for standard cell library elements, only selected ones.
 Symbol libs for manual placement from 3rd parties getting in pulled during install/setup
 
-*sky130_fd_io* IO library - complex cells derived from cypress legacy designs
+**sky130_fd_io**   
+IO library - complex cells derived from cypress legacy designs
 use caravel reference design to understand how to use and connect these.
 
-*sky130_ef_io* overlay cells needed to configure IO cells properly for power-clamps etc
+**sky130_ef_io**  
+overlay cells needed to configure IO cells properly for power-clamps etc
 
-*sky130_fd_pr* 
+**sky130_fd_pr**  
 Primitive devices following best-practices in layout and modeling, some obsolete like the MOM-cap device which should be replaced by MIM-caps if voltage complies. 
 
-*SRAM and NVRAM* not included in PDK for now.
+**SRAM and NVRAM**  
+not included in PDK for now.
 SRAM is convered by the *openRAM-project* might be merged with PDK in near future.
 NVRAM is incomplete as only a SONOS device is available so far, aux circuits like charge pump and sense/erase are missing. Will not appear soon.
+
+----
 
 ### Open Source Tools and Flows
 The free alternative to the bid 3 in commercial EDA.
@@ -218,15 +263,16 @@ A simple manual design flow is shown here based on free opensource tools:
 xschem and magic both generate spice netlists from schematic and extraction to run LVS checks. 
 DRC checks are performed on-the-fly in magic.
 
+----------------
 
 ## Lab 1
 
 Note all labs run in the VSD sandbox, but all used tools can be set up on any recent linux system.
 Howtos available on github for installing the tools and pdk on your own linux.
 
-*Survival Skills needed in the opensource world:*
-1. always pull updates and compile from the source yourself
-2. run tools from command line, get used to programming/scripting in python etc
+### Survival Skills needed in the opensource world
+>1. always pull updates and compile from the source yourself. repeat frequently.
+>2. run tools from command line. get used to some level of programming/scripting in python etc
 
 ### check tool installations
 
@@ -249,28 +295,28 @@ Exit xschem by typing `exit` - not `quit`unlike in netgen and magic which are tc
 
 5. try the no-console versions
 
-* `magic -noconsole` and 
+* `magic -noconsole` and   
 * `netgen -noconsole` 
 will use the terminal as console without starting their own console windows
 
-6.  run magic in script mode:
+6.  run magic in script mode:  
 * `magic -dnull -noconsole`
 * `magic -dnull -noconsole test.tcl`
 
 ![image](https://user-images.githubusercontent.com/93275755/139241696-06938f4a-65d9-4c7b-90af-3d782c7bb986.png)
 
-7. the other tools running in batch mode
+7. the other tools running in batch mode  
 
-* netgen: `netgen -batch source test.tcl`
+* netgen: `netgen -batch source test.tcl`  
 ![image](https://user-images.githubusercontent.com/93275755/139242251-7449768d-f7a8-4861-9793-15a3559e8822.png)
 
-* xschem  `xschem --tcl test.tcl -q`
-throws an error on the test.tcl since it does not understand `quit` which is part of the tcl extension in magic
+* xschem  `xschem --tcl test.tcl -q`  
+throws an error on the test.tcl since it does not understand `quit` which is part of the tcl extension in magic  
 
 ![image](https://user-images.githubusercontent.com/93275755/139242751-7155e991-7465-4236-9ce4-ab11a28a6d08.png)
 
-* ngspice `ngspice -b`
-not that ngspice does not understand tcl
+* ngspice `ngspice -b`  
+not that ngspice does not understand tcl  
 
 ---
 
