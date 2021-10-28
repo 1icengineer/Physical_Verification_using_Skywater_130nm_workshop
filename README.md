@@ -365,9 +365,36 @@ For enhanced graphics, try `magic -d XR` for cairo-based graphics or`magic -d OG
 
 ----
 
+**Basic editing in magic**
+
+You should see a white box and the crosshaired cursor.   
+Shift+Z to zoom out, LMB click to relocate the box and RMB click to resize.  
+Hover your cursor over one of the colour tabs on the right (metals etc) and either press your middle mouse button or P to "paint"  
+Place the box over a painted structure, hover over the respective colour tab (layer) and press E to erase the area within the white box with the corresponding colour.  
+The box concept allows for fairly complex shapes to be drawn and assembled:
+
+![image](https://user-images.githubusercontent.com/93275755/139315995-6b424cb8-4e14-4755-9089-15d509753214.png)
+
+![image](https://user-images.githubusercontent.com/93275755/139316072-eb37dda9-3146-4532-a163-d995f0053a7d.png)
+
+More information on magic editing at http://opencircuitdesign.com/magic/tutorials/tut1.html
+
+
+
+**Placing a device in magic**
+
 click on Devices1 and place a MOSFET with these sample properties:
 
 ![image](https://user-images.githubusercontent.com/93275755/139312518-a9a791f7-cc83-4f4c-b1cd-8b2366f0b156.png)
+
+**Generaing a schematic in xschem**
+
+Go back to ../xschem and run `xschem` 
+Then select File - New Schematic and press the "insert" key on your keyboard:  
+
+![image](https://user-images.githubusercontent.com/93275755/139317657-5c6da789-aceb-46c5-85a4-059d2973687c.png)
+
+
 
 
 
