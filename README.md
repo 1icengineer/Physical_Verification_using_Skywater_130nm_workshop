@@ -320,7 +320,7 @@ note that ngspice does not understand tcl
 
 ---
 
-### PV_D1SK2_L2 - Creating Sky130 Device Layout In Magic
+### Lab: PV_D1SK2_L2 - Creating Sky130 Device Layout In Magic
 
 First create a local project directory structure with links to the pdk init files for the apps needed:
 
@@ -387,15 +387,131 @@ click on Devices1 and place a MOSFET with these sample properties:
 
 ![image](https://user-images.githubusercontent.com/93275755/139312518-a9a791f7-cc83-4f4c-b1cd-8b2366f0b156.png)
 
-**Generaing a schematic in xschem**
+----
+
+### Lab: PV_D1SK2_L3 - Creating Simple Schematic In Xschem
 
 Go back to ../xschem and run `xschem` 
 Then select File - New Schematic and press the "insert" key on your keyboard:  
 
 ![image](https://user-images.githubusercontent.com/93275755/139317657-5c6da789-aceb-46c5-85a4-059d2973687c.png)
 
+Place nmos, pmos and pins onto schematic, using insert key and select the following libraries
+1) for nmos pmos:  
+![image](https://user-images.githubusercontent.com/93275755/139323106-2a1eac8d-f30b-4ced-bff0-a53e4e0464d2.png)
+![image](https://user-images.githubusercontent.com/93275755/139323157-ba7b8f2d-333a-47c3-ae81-6033b3022f32.png)
 
 
+2) for the pins (ipin, opin, iopin):  
+![image](https://user-images.githubusercontent.com/93275755/139323021-650b8c8e-c53b-4cba-8a27-56aa15a4d85b.png)
+
+
+The place real labels on the pins by selecting each one and then press Q for properties:
+
+![image](https://user-images.githubusercontent.com/93275755/139322581-798618e0-a980-4d79-9b72-aaadb7425367.png)
+
+In a similar fashion, select and bring up the props via Q for the mosfets, adjusting them to their final configs:
+
+nmos properties after modification:  
+![image](https://user-images.githubusercontent.com/93275755/139337702-5d3f9e2a-60cf-4ad6-8c67-957530ab1950.png)
+
+pmos:  
+L=0-18u / W=3 / nf=3 /bulk=vdd  
+![image](https://user-images.githubusercontent.com/93275755/139338045-37f520bd-cff3-4525-9412-74aaa35c06d6.png)
+
+## PV_D1SK2_L4 - Creating Symbol And Exporting Schematic In Xschem
+
+Next we need is to create a symbol from our schematic - go to `Symbol - Make Symbol from Schematic`
+
+![image](https://user-images.githubusercontent.com/93275755/139338881-5bdc2f91-8311-488c-b2a4-5d45f6b7f801.png)
+
+Then we need to create a testbench schematic. Open a new empty sheet in xschem:  
+
+Use the insert key and select the inverter symbol we just created:  
+![image](https://user-images.githubusercontent.com/93275755/139339679-0677b9a7-e8a4-448d-b60c-c6eb0fd94892.png)
+
+Then, place voltage sources, gnd and opin symbols for probes. 
+Parameterize voltage sources suitable for tran simulation:  
+
+![image](https://user-images.githubusercontent.com/93275755/139394227-c82912ee-fe01-4d96-9418-e026f5249690.png)
+
+Now we need to enter simulation statements line `.tran` and similar to the schematic.
+This is done by adding adding a symbol `code_shown.sym`
+
+Parameterize the code_shown symbols to carry the following statements:
+> name=s1 only_toplevel=false value=".lib /usr/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt"  
+and  
+> name=s2 only_toplevel=false value=".control  
+>tran 1n 1u  
+>plot V(vin) V(vout)
+>.endc"
+
+Use the respective labels you have placed earlier on.
+
+![image](https://user-images.githubusercontent.com/93275755/139397086-0d6b0b99-8836-4632-bf7d-58e9d1745f12.png)
+
+Then save the file under a suitable name and run the simulation specified.
+
+---
+
+Now click the button `Netlist` and then `Simulation` to launch the spice simulation:
+
+![image](https://user-images.githubusercontent.com/93275755/139399823-bc7f8604-d761-4593-a322-6552d459f553.png)
+
+Since the first simulation result showed a kind of floating output, I checked the netlist for debugging:  
+
+![image](https://user-images.githubusercontent.com/93275755/139403625-b7a70903-5af6-4d50-b458-5b70cc4db409.png)
+
+Note that the supply connections on the inverter schematic are not properly recognized when wired in north/south direction:  
+
+![image](https://user-images.githubusercontent.com/93275755/139403833-a3d0f47c-2700-40fd-ae91-8021b2208f94.png)
+
+So, in order for these to be correctly netlisted we need to draw them this way:
+
+![image](https://user-images.githubusercontent.com/93275755/139404091-ba18597c-d2f9-4edc-b654-1ded118f057e.png)
+
+And subsequently the netlist shows the correct supplies on our subcircuit:
+
+![image](https://user-images.githubusercontent.com/93275755/139405393-3fa16407-b59b-4873-b086-cabd12b06a7d.png)
+
+With that, we obtain the expected results from our simulation:
+
+![image](https://user-images.githubusercontent.com/93275755/139406281-929542ce-6e19-4a33-bd85-1b39cfb2f4af.png)
+
+
+Now that we have verified proper circuit functionality, we can proceed to netlist export for layout in magic.  
+For that, check the option `LVS netlist: toplevel is a .subckt` under `Simulation`:
+
+![image](https://user-images.githubusercontent.com/93275755/139407696-e9bd29e4-bf36-4a8f-b1e6-42dc23488bd5.png)
+
+With that, we can generate the subcircuit netlist to read into magic next. Here is the subckt netlist being generated:
+
+![image](https://user-images.githubusercontent.com/93275755/139411098-38b6c6b5-4067-4b10-8435-80b16bef8b25.png)
+
+
+----
+
+## PV_D1SK2_L5 - Importing Schematic To Layout And Inverter Layout Steps
+
+Now we head back to magic for importing the netlist and editing the layout:  
+> cd ../mag
+> magic -d XR
+
+Then import the inverter spice netlist via `File - Import SPICE`  
+
+![image](https://user-images.githubusercontent.com/93275755/139415172-35d431c4-6a2b-4e92-8a47-4f79b8b2b10d.png)
+
+resulting in this inital setting:  
+
+![image](https://user-images.githubusercontent.com/93275755/139413705-caf4e581-8b36-45f8-82f0-257246ed8408.png)
+
+Rearrange this layout with key "i", "s", "m" (select instance, shape, move) and go to pmos properties:
+
+![image](https://user-images.githubusercontent.com/93275755/139423419-2426f5f5-882d-4dbc-92df-a0bca32ccbfa.png)
+
+Set Top Guardring coverage to 100% for metal on top of the ring, Source via coverage to +40, Drain coverage to -40:
+
+![image](https://user-images.githubusercontent.com/93275755/139423884-94f539d0-7484-4139-b90f-ac79508dbc4c.png)
 
 
 
