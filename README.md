@@ -514,7 +514,95 @@ Set Top Guardring coverage to 100% for metal on top of the ring, Source via cove
 ![image](https://user-images.githubusercontent.com/93275755/139423884-94f539d0-7484-4139-b90f-ac79508dbc4c.png)
 
 
+Next we need to establish connectivity all on metal1 between the devices and pins/pads in this layout, so we arrive at a complete layout:
 
+![image](https://user-images.githubusercontent.com/93275755/139454532-4f6d274d-19d6-4960-b3f3-32cfaf1d0d86.png)
+
+
+## PV_D1SK2_L6 - Final DRC/LVS Checks And Post Layout Simulations
+
+Now we can extract our layout using these commands in the magic command window:
+>extract do local
+>extract all
+
+![image](https://user-images.githubusercontent.com/93275755/139454154-b4d60c6c-2dff-4f25-b35b-29e69aded988.png)
+
+This generates an extracted dataset in magic which needs to be converted to a spice netlist for postlayout simulation:
+>ext2spice lvs
+>ext2spice
+
+Ths results in an extracted spice netlist containing all extracted layout devices:
+
+![image](https://user-images.githubusercontent.com/93275755/139455266-bc3ebefe-32cc-4938-8f18-f08836851eaa.png)
+
+Next we will run LVS to ensure our layout is correct, by comparing the extracted spice netlist from magic with the one for the schematic from  xschem:
+
+in the terminal we enter:
+> cd ../netgen
+> netgen -batch lvs "../mag/inverter.spice inverter" "../xschem/inverter.spice inverter" 
+
+This runs netgen on the two netlists supplied, referencing the inverter subcircuits therein.  
+Result:  
+![image](https://user-images.githubusercontent.com/93275755/139457150-539f757b-240d-4600-90f5-009fb7b2a36e.png)
+![image](https://user-images.githubusercontent.com/93275755/139457200-f4bd9d24-3498-4bdf-8814-b3f1046ffae5.png)
+
+So these two netlists match, indicating our layout is correct.
+
+Next we will extract layout parasitcs to be included in a post-layout simulation:
+
+go back magic and open the inverter layout, then enter the follwoing commands for magic
+>extract do local
+>extract all
+>ext2spice lvs
+>ext2spice cthres 0
+>ext2spice
+
+With tha we obtain a netlist with extracted caps from our layout included:
+
+![image](https://user-images.githubusercontent.com/93275755/139459240-b18007ba-830d-4e61-95aa-a31d8229fc56.png)
+
+We can now build a testbench for this circuit by reusing the one created above for the schematic version:  
+In the mag subdir copy over the testbench netlist from the xschem dir:
+>cp ../xschem/testbench_inverter.spice .
+>vim testbench_inverter.spice
+
+In the testbench we now need to adjust the call of our extracted subcircuit, as the pins and their sequence might have changed.  
+Extraction in magic is basically showing all pins in a different order.  
+
+We do this by considering the extracted spice netlist subckt definition
+![image](https://user-images.githubusercontent.com/93275755/139462190-edce8ceb-4454-4686-adcf-49b88d9ff8b3.png)
+
+and entering that one to our testbench_inverter.spice subckt call:
+![image](https://user-images.githubusercontent.com/93275755/139462473-aa46909b-92d7-449b-a025-37e27ec3d3ac.png)
+
+Plus we added an include statement to ensure the extracted netlist from our local mag subdir is used:
+>.include ./inverter.spice
+
+Then we save our testbench spice netlist file run spice on it:
+>ngspice testbench_inverter.spice
+
+Result of that run:
+![image](https://user-images.githubusercontent.com/93275755/139462875-e71620ef-551e-4d73-b8dc-cd6d46e3a3df.png)
+
+Just for fun, lets run a combined pre/post-layout sim as well by modifying the testbench to call both extracted and schematic versions of the inverter:
+![image](https://user-images.githubusercontent.com/93275755/139463846-e0834280-bfd5-430d-81c8-a455886d89af.png)
+
+In this netlist, two calls ae being made:
+1) to interver.schem, the schematic version, generating V(out.schematic)
+2) to the local inverter from ./inverter.spice, generating V(out.extracted)
+
+Note that both calls have different pin sequences as discussed above.  
+Otherwise, they are functionally equivalent, just with/without parasitics.  
+
+After ngspice finishes, we get this output:
+
+![image](https://user-images.githubusercontent.com/93275755/139464980-4b6dd3d5-3818-4b5e-952d-1d2ebd9bda75.png)
+
+There are only very small layout parisitics in this circuit, resulting in very little difference between the blue output (schematic) and the yellow (extracted).
+
+------------------------
+
+## Day2
 
 
 
