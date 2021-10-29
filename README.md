@@ -602,7 +602,205 @@ There are only very small layout parisitics in this circuit, resulting in very l
 
 ------------------------
 
-## Day2
+## Day2 GDS read/write, extraction, DRC, LVS and XOR setup
+
+These lectures cover in more depth what extraction, DRC, LVS are about, plus some nice anecdotes on magic vlsi. 
+If you have done layout work in cadence you'll know most of the basics, only certain commands / approaches in magic might be new. 
+
+Heading to the labs for Day2
+
+### PV_D2SK2_L1 - GDS Read
+
+Create a new workspace with mag subdirectory and copy the init file:  
+>thorsten@icdesign-workshop:~/course/lab2$ cp /usr/share/pdk/sky130A/libs.tech/magic/sky130A.magicrc ./.magicrc
+>thorsten@icdesign-workshop:~/course/lab2$ magic -d XR
+
+in magic run
+>cif listall istyle
+>cif list istyle    -->to see the active style, which is sky130(vendor)
+
+Now we load a gds cell lib from our pdk distribution:
+
+>gds read /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/gds/sky130_fd_sc_hd.gds
+
+then get a list of all loaded cells via:
+>cellname top
+  
+![image](https://user-images.githubusercontent.com/93275755/139493571-359d48a8-d15e-461c-8061-7b1226af58c6.png)
+
+or use cell manager to browse cells loaded:
+
+![image](https://user-images.githubusercontent.com/93275755/139493825-a865bef0-a556-47cb-81d0-76aac699d331.png)
+
+![image](https://user-images.githubusercontent.com/93275755/139493843-1ca49dee-5c49-42c8-9685-f66fed0bb7c0.png)
+
+Pick eg the and2_1:  
+
+![image](https://user-images.githubusercontent.com/93275755/139494042-56e9dd33-19c3-46b9-aa19-a182af4af0a0.png)
+
+Labels turned from yellow to blue by activating the correct  vendor style sky130(vendor).  
+If a different unfitting style is chosen, all labels will turn yellow, ie they are text.
+
+So, if we are running in magic  
+>cif istyle sk130()
+>gds read /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/gds/sky130_fd_sc_hd.gds
+
+then all labels turn yellow.  
+
+![image](https://user-images.githubusercontent.com/93275755/139494893-0b05f978-8f1d-42db-8325-3556cf16d170.png)
+
+
+while 
+
+>cif istyle sk130(vendor)
+>gds read /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/gds/sky130_fd_sc_hd.gds
+
+turns them blue again, indicating "real" pins:
+
+![image](https://user-images.githubusercontent.com/93275755/139494962-31e6f3be-122c-4612-b0cd-de95ddc59e33.png)
+
+During these switches between istyles the gds lib was re-read everytime after, overwriting existing cells from the lib in memory.  
+this can be deactivated by means of:  
+>gds noduplicates true
+
+which will disallow magic to re-read a cell already in memory a second time, freezing cells in memory in their respective state. 
+
+----
+
+### PV_D2SK2_L2 - Ports
+
+Now we will take a closer look at labels and ports:  
+
+![image](https://user-images.githubusercontent.com/93275755/139496059-ab63401c-80e0-439a-917f-64aab07320b3.png)
+
+We notice that all port information besides the name is not preserved in gds, eg port use, port class etc.  
+LEF is needed for that.
+
+But at least we can browse the list of ports in our gds cell:
+
+![image](https://user-images.githubusercontent.com/93275755/139496752-95454526-8126-41c5-a8f9-54d589206c3a.png)
+
+The order of pins matters for spice, while it does not for gds and magic. 
+
+Check the spice of our lib and seek the and2_1 cell  
+>vim /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice 
+
+![image](https://user-images.githubusercontent.com/93275755/139497601-49cb17a3-a935-48f8-843e-11c335a105bf.png)
+
+All this information is rad in by magic from gds, lef, spice files combined and then processed to maintain proper port/pin order.
+
+now we read in the lef file for our lib:  
+>lef read /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_fd_sc_hd.lef
+
+This lef information is annotated to our cell in case there is a match and we now have full information on our ports available:  
+
+![image](https://user-images.githubusercontent.com/93275755/139498179-353cf244-5c8e-4ba7-9a45-00fd49a91079.png)
+
+Spice libs cannot be read in directly to establish port order. But we have tcl script available to read this information:  
+>readspice /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+
+which will cause the port order to be adjusted in magic for all fitting cells:  
+
+![image](https://user-images.githubusercontent.com/93275755/139498747-fb8061ca-4b17-4817-b03b-47615420a449.png)
+
+Now port order is established in our gds per the spice file and port purposes were read in from the LEF:  
+
+![image](https://user-images.githubusercontent.com/93275755/139499426-5f9ac1a6-c164-44eb-9e4f-b2cca333230f.png)
+
+----
+
+#### PV_D2SK2_L3 - Abstract Views
+
+This time we will take a closer look at cell abstracts from the LEF file.
+
+In a new magic session we are reading in the lef alone, without gds or spice:  
+>lef read /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_fd_sc_hd.lef
+
+loading our and2_1 cell again we notice the LEF contains a very simplified view of the cell compared to the gds:  
+
+![image](https://user-images.githubusercontent.com/93275755/139500275-3b3f47c9-61fc-4f2a-a686-18dd3442e5e4.png)
+
+LEF contains routing data, labels, port meta-data but not all meta-data liek port sequence.  
+
+![image](https://user-images.githubusercontent.com/93275755/139500545-2136ba09-3d65-47b3-9990-342f9fdd610e.png)
+
+Port order needs to come from spice, as shown lab L2 above.
+
+Creating a new cell, loading the abstract view and writing to gds is possible, but somewhat useless:  
+
+![image](https://user-images.githubusercontent.com/93275755/139501454-0bc75727-60a3-4bb3-b9f1-a6db86eded90.png)
+
+The resulting gds is sort of crippled as many layers are missing, but magic is smart enough to retain the missing information from its pdk reference libs and produce a correct-looking gds. However, port assignments and such are still incorrect (yellow, ie just labels)
+
+----
+
+## PV_D2SK2_L4 - Basic Extraction
+
+now close and reopen a new magic window, then type:  
+>load sky130_fd_sc_hd__and2_1
+
+this will find the cell in the pdk reference libs and place it in current layout:  
+
+![image](https://user-images.githubusercontent.com/93275755/139503472-d815c334-2a3b-48f4-a061-b6f06430b4ba.png)
+
+now run in magic:  
+>extract all
+>ext2spice lvs
+>ext2spice
+
+here is the extracted netlist generated:  
+
+![image](https://user-images.githubusercontent.com/93275755/139503715-b4a8a8aa-7542-475f-b392-04b0d86b7619.png)
+
+
+>ext2spice cthres 0
+>ext2spice
+
+will produce a parasitic netlist:  
+
+![image](https://user-images.githubusercontent.com/93275755/139503972-0a71dff9-d0d0-40c1-83e2-4397ef1309e4.png)
+
+level of caps included can be controlled by setting a different threshold
+
+----
+
+Now we try these commands  
+
+>ext2sim labels on
+>ext2sim
+>extresist tolerance 10
+>extresist
+>ext2spice lvs
+>ext2spice cthres 0.01
+>ext2spice extresist on
+>ext2spice
+
+we will get a complete spice netlist with rc extracted:  
+
+![image](https://user-images.githubusercontent.com/93275755/139504694-054ceb32-11cb-440c-813e-ac767d701e63.png)
+
+
+After extending our testbench from Lab1 and modifying subckt calls, we run a comparison of schematic, cap-extract and rc-extract in one simulation:  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
