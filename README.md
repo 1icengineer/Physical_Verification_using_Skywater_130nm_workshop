@@ -782,6 +782,113 @@ we will get a complete spice netlist with rc extracted:
 
 After extending our testbench from Lab1 and modifying subckt calls, we run a comparison of schematic, cap-extract and rc-extract in one simulation:  
 
+----
+
+## PV_D2SK2_L5 - Setup For DRC
+
+Running DRC on the and2_1 gate cell yields the following DRC errors:
+
+![image](https://user-images.githubusercontent.com/93275755/139703815-b56a4c01-81fc-4001-9f39-6f409363ad78.png)
+
+Open the respective cell in magic layout editor via  
+>load sky130_fd_sc_hd__and2_1
+
+And now enter  
+>drc style
+
+![image](https://user-images.githubusercontent.com/93275755/139704140-747b120c-fc1a-4be4-bce4-864d41c39afb.png)
+
+Partial drc runsets being used in magic at this point is the reason why magic does not flag drc errors, while the external script does.
+
+Switch to full drc ruleset by  
+> drc style drc(full)
+
+Then re-issue the DRC run in magic with this full set of tests put the cursor on the cell content in layout window and type  
+>:drc check  
+The : routes this  command straight to the magic vlsi interpreter 
+
+Notice the redmarks on all DRC erros now found:  
+![image](https://user-images.githubusercontent.com/93275755/139704782-afd28260-10c6-4f39-9285-814784343ba3.png)
+
+
+These can be examined by hover over, pressing S and then run >:drc why
+
+These drc errors on standard cell lib cell can be avoided in this case by assing substrate tap cells.  
+Load a new design with the and cell and then a subtap by running
+
+>load test2
+>getcell sky130_fd_sc_hd__and2_1
+>getcell sky130_fd_sc_hd__vpwrvgnd_1
+
+Now the DRC errors in our gate cell are gone, but new ones came in due to placement violations:  
+![image](https://user-images.githubusercontent.com/93275755/139705476-cbb76a52-6def-43b6-8593-1139741cf1df.png)
+
+We correct this by moving the tap cell to align with the gate cell using the arrow keys and we notice the drc error count dropping to zero:  
+![image](https://user-images.githubusercontent.com/93275755/139705661-3c9c2cea-8ff4-4729-9e32-136c72bd2a68.png)
+You can track the drc live updates to find the correct arrangement while moving the cell using the arrow keys.
+
+----
+
+Not that magic DRC operates fully hierachical, ie it keeps the list of intra-cell drc violations where in this case the subtaps are missing and it distinguishes those from higherlevel drc where the taps are in fact present.  
+Verify this by selecting the and2_1 gate using "i" and then  descending with the ">" key.   
+Inside the and2_1 cell, the above violations are present, while they are gone on the upper level layout.
+
+----
+
+## PV_D2SK2_L6 - Setup For LVS
+
+Make a new directory for netgen to run LVS:  
+> mkdir netgen
+> cd netgen
+> cp /usr/share/pdk/sky130A/libs.tech/netgen/sky130A_setup.tcl ./setup.tcl
+
+now open the and2_1 cell again in magic after >cd ../mag and then run inside magic:  
+>ext2spice lvs
+>ext2spice
+
+Now back in the netgen subdir run LVS by:  
+>netgen -batch lvs "../mag/sky130_fd_sc_hd__and2_1.spice sky130_fd_sc_hd__and2_1" "/usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd__and2_1  sky130_fd_sc_hd__and2_1"
+
+So in a nutshell you run >netgen -batch lvs "<path.to.magic.spice> <name.of.top.cell>" "<path.to.schematic.spice> <name.of.top.cell>" and compare the two spice netlists created by magic and by xschem
+
+In this case layout and schematic match, which is confirmed by he netgen output:  
+![image](https://user-images.githubusercontent.com/93275755/139708148-9f8a486a-1610-466e-9938-0150a6247a9e.png)
+
+----
+
+## PV_D2SK2_L7 - Setup For XOR
+
+We can also run XOR comparisons to find out modifications in a layout that might have left to DRC or LVS violations to get an output just howing the differences between a later version layout and an earlier/reference version:  
+![image](https://user-images.githubusercontent.com/93275755/139709099-c1b86f24-2ce0-452e-8543-649307ae2087.png)
+
+In this example some things got accidentally shifted vs the original resulting in stripline plots on the xor result layout.
+
+Generate these by running in magic:  
+>load sky130_fd_sc_hd__and2_1
+>save changed.layout
+>load changed.layout
+
+
+Now erase something eg by dropping a box on the layout and enter >:erase li
+
+Next flatten the layout and load the unchanged reference cell:  
+>flatten -nolabels xor_test
+>load sky130_fd_sc_hd__and2_1
+
+And run the XOR test and load the results by:  
+>xor -nolabels xor_test
+>load xor_test
+
+This last loaded file called >xor_test contains the differences on each layer checked and provides insight into what changed in layout.
+
+--------------
+
+# Day 3 - Front-end and back-end DRC
+
+
+
+
+
 
 
 
