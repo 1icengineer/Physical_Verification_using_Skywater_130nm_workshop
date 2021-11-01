@@ -1170,6 +1170,18 @@ Afterwards, **timing analysis** is performed using OpenSTA, using ideal clocks (
 **config.tcl**
 is the cnetral config file to control the elements of the complete RTL2GDS flow using OpenLANE.
 
+To run the OpenLANE Demo run  these commands:  
+>cd openlane/desins/spm  
+>export PDK_ROOT=/usr/share/pdk  
+>make mount  
+>./flow.tcl -desing spm -tag workshop   
+
+--> after approx 10mins synthesis completes with all steps being run and with magic & gds being generated alongside reports and various infos from synthesis and analysis.
+
+
+
+
+
 
 
 
