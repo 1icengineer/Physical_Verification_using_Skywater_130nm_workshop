@@ -419,7 +419,7 @@ pmos:
 L=0-18u / W=3 / nf=3 /bulk=vdd  
 ![image](https://user-images.githubusercontent.com/93275755/139338045-37f520bd-cff3-4525-9412-74aaa35c06d6.png)
 
-## PV_D1SK2_L4 - Creating Symbol And Exporting Schematic In Xschem
+### PV_D1SK2_L4 - Creating Symbol And Exporting Schematic In Xschem
 
 Next we need is to create a symbol from our schematic - go to `Symbol - Make Symbol from Schematic`
 
@@ -491,7 +491,7 @@ With that, we can generate the subcircuit netlist to read into magic next. Here 
 
 ----
 
-## PV_D1SK2_L5 - Importing Schematic To Layout And Inverter Layout Steps
+### PV_D1SK2_L5 - Importing Schematic To Layout And Inverter Layout Steps
 
 Now we head back to magic for importing the netlist and editing the layout:  
 > cd ../mag
@@ -734,7 +734,7 @@ The resulting gds is sort of crippled as many layers are missing, but magic is s
 
 ----
 
-## PV_D2SK2_L4 - Basic Extraction
+### PV_D2SK2_L4 - Basic Extraction
 
 now close and reopen a new magic window, then type:  
 >load sky130_fd_sc_hd__and2_1
@@ -784,7 +784,7 @@ After extending our testbench from Lab1 and modifying subckt calls, we run a com
 
 ----
 
-## PV_D2SK2_L5 - Setup For DRC
+### PV_D2SK2_L5 - Setup For DRC
 
 Running DRC on the and2_1 gate cell yields the following DRC errors:
 
@@ -835,7 +835,7 @@ Inside the and2_1 cell, the above violations are present, while they are gone on
 
 ----
 
-## PV_D2SK2_L6 - Setup For LVS
+### PV_D2SK2_L6 - Setup For LVS
 
 Make a new directory for netgen to run LVS:  
 > mkdir netgen
@@ -856,7 +856,7 @@ In this case layout and schematic match, which is confirmed by he netgen output:
 
 ----
 
-## PV_D2SK2_L7 - Setup For XOR
+### PV_D2SK2_L7 - Setup For XOR
 
 We can also run XOR comparisons to find out modifications in a layout that might have left to DRC or LVS violations to get an output just howing the differences between a later version layout and an earlier/reference version:  
 ![image](https://user-images.githubusercontent.com/93275755/139709099-c1b86f24-2ce0-452e-8543-649307ae2087.png)
@@ -883,7 +883,148 @@ This last loaded file called >xor_test contains the differences on each layer ch
 
 --------------
 
-# Day 3 - Front-end and back-end DRC
+## Day 3 - Front-end and back-end DRC
+
+This content is dealing in very fine detail with how you setup and alter existing DRC decks for the following classes of issues.
+* PV_D3SK2_L1 - Lab For Width Rule And Spacing Rule
+* PV_D3SK2_L2 - Lab For Wide Spacing Rule And Notch Rule
+* PV_D3SK2_L3 - Lab For Via Size, Multiple Vias, Via Overlap and Autogenerate Vias
+* PV_D3SK2_L4 - Lab For Minumum Area Rule And Minimum Hole Rule
+* PV_D3SK2_L5 - Lab For Wells And Deep N-Well
+* PV_D3SK2_L6 - Lab For Derived Layers
+* PV_D3SK2_L7 - Lab For Paramterized And PDK Devices
+* PV_D3SK2_L8 - Lab For Angle Error And Overlap Rule
+* PV_D3SK2_L9 - Lab For Unimplemented Rules
+* PV_D3SK2_L10 - Latch-up And Antenna Rules
+* PV_D3SK2_L11 - Lab For Density Rules
+
+From my perspective this lecture part mostly relevant for thos who write DRC decks, which is usually done by foundry experts, or a modeling group inside a design-house or similar. 
+
+For circuit designers and layout engineers I would see this as optional, as we usually work with fixed andset DRCrulesets which we are not supposed to change.  
+If you  wanted to know how you could fix your layout to be DRC compliant, these labs provide insght.
+
+To install the lab workfiles on your system clone start by cloning the following git repo and then start the exercises:
+>git clone https://github.com/RTimothyEdwards/vsd_drc_lab.git
+>cd vsd_drc_lab
+>./run_magic
+
+Then >load exercise_1 in magic.
+
+In the example opening, place a box around the first item using LMB adn RMB and then run DRC on it:  
+![image](https://user-images.githubusercontent.com/93275755/139712523-b975553d-60e9-4e57-9c2e-3eda7bcac98b.png)
+
+Resulting in this error being listed:  
+![image](https://user-images.githubusercontent.com/93275755/139712620-76828011-6945-4321-8d95-36f8490ccccb.png)
+
+White dots indicate the missing area/width.
+
+You can hover over any DRC violation highlighted in layout and press "?"
+
+Use the grid and snap to grid for some fixing certain offgridn errors. 
+
+Here in the example we need to widen the metal trace which can be done by:  
+1.) using middle mouse button auto-paint:  
+    draw box around eg metal to enlarged, then hover over metal and press MM. This will sample the currently used metal and paint the whole enlarged box with it.  
+2.) hover over metal to be enlarged, then type 
+    >: box width 0.14  
+    and hit return and enter in layout
+    >: paint m2
+    
+
+for shifting shapes around the following commands might be helpful:  
+>:move e 0.14um
+>:stetch n 0.14um
+>:box 
+
+use your respective north/south/east/west directions to optimize or fix shapes.
+
+**Streteching** shapes (like the s key in virtuoso layout) can be accomplished using the numerical keypay arrows under key 8,6,2,4:
+1) select the shape to be stretched such that the edge to be moved is fully contained in the white box  
+2) press "a" for area select
+3) now press nad hold shift while using eg the numpad 4 or 6 keys to move the edge east or west
+
+![image](https://user-images.githubusercontent.com/93275755/139727809-f56674f1-2bb5-4fa5-bd66-fa3e3e635b94.png)
+![image](https://user-images.githubusercontent.com/93275755/139727830-9c6b5d02-8681-42a3-9cb6-60067ce7c7bf.png)
+
+alternatively to numpad keys use the command version:
+>:strecth e 1.6um
+
+----
+Via Arrays:
+
+>cif see MCON 
+or (VIA1, VIA2 etc) highlights the contacts/vias drawn automatically in magic with the Skywater 130 pdk to populate the metal area with vias.
+
+Use these command to highlight errors on vias and other structures
+>feedback why
+>feedback clear 
+
+These commands grow the box to reshape a metal patch or selection of patches symmetrically:  
+>: box grow e 0.3um
+>: box grow w 0.3um  
+then use middle mouse button to select and paint the box area with the metal to be grown.
+
+![image](https://user-images.githubusercontent.com/93275755/139729648-fbedf73e-d470-42ae-a6c5-aa98bd250aa0.png)
+![image](https://user-images.githubusercontent.com/93275755/139729617-432de0af-b12c-48fb-be95-d5b3c44f6998.png)
+
+Use the wiring tool to auto-place vias by hitting "space" many times until it says "switching to wiring tool":  
+Now move around the mouse button (shown by a hand with pointing finger), use the LMB (left mouse button) to start a new segment.  
+Note:  
+> shift + LMB will change to metal layer ABOVE the current layer,  
+> shift + RMB will change to a layer BELOW the current routing layer.
+
+![image](https://user-images.githubusercontent.com/93275755/139730302-410e2f34-d36d-4f92-931e-b5afbdbf4b1a.png)
+
+Magic will automatically insert a suitable array of vias fitting in the overlap area between the lower and upper metal of the new metal transition.
+Note that wiring created this way will always adhere to minimum metal width and coverage rules on all alyers.
+
+----
+
+**Holes in metal** are checked with drc style(full).  
+To fix minimum metal hole errors, draw a box manually over the hole and measure its size with the "b" key.
+
+Now grow a larger box and place over/around the hole, measure with b to verify it is large enough and enter:  
+>: erase m1  
+to enlarge the cutout on e.g. m1
+
+
+----
+
+**Wells and Taps**
+
+NWELL must be contacted by N-tap contact, adhering to overlap and distance rules which can be fixed as the metal errors above
+N-Tap in turn must be contacted by "li" (local interconnect):  
+![image](https://user-images.githubusercontent.com/93275755/139734615-fd80b06c-fedd-40c9-8a11-084c6955bf89.png)
+
+
+Substrate contacts must be filled with contact "p-sub p-contact" and "li":  
+![image](https://user-images.githubusercontent.com/93275755/139734536-a07b171e-3fae-476c-ad1d-6deebf0c35c7.png)
+
+
+Draw automatic DNWELL ring contact assemblies using the menu:  
+![image](https://user-images.githubusercontent.com/93275755/139733831-6622ee2a-6f3f-4481-9af3-3875f5b54083.png)  
+Draw the white box large enough and sufficiently far away from existing NWELL and DNWELL contacts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
