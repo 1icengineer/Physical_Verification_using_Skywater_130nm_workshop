@@ -1006,6 +1006,113 @@ Draw automatic DNWELL ring contact assemblies using the menu:
 Draw the white box large enough and sufficiently far away from existing NWELL and DNWELL contacts.
 
 
+----
+
+Pcells / Parameterized devices
+
+magic will flag pcells without higher level interconnect for minimum metal area violations. 
+These will vanish once the device is properly connected.  
+Use pop into devices using "s" and ">" to verify this behavior inside and outside cells
+
+
+
+-----
+
+**Latchup / Antenn checks**
+
+we need to extract the design to eval the elecrical connectivity to long metal lines and then run antenna check:  
+
+> extract do local
+> extract all
+> antenncheck
+
+this just provides silent feedback, use >: feedback why to find out what is flagged in your current selection box
+
+Run:  
+>antennacheck debug
+>antennacheck
+
+to get a real debug report: 
+
+![image](https://user-images.githubusercontent.com/93275755/139738584-7e683f84-7e54-4689-9648-39d1a3a40ca0.png)
+
+When fixing an antenna error, by placing and connecting an antenna diode, be sure clear all feedack and rerun extract and antennacheck
+
+>: feedback clear
+>extract all
+>antennacheck debug
+>antennacheck
+
+Another way to fix antenna violations is to via down to layers existing in the respective metal deposition step eg for M2, via down to M1 and connect antenna-forming  structures on M1 to avoid the error altogether:  
+
+![image](https://user-images.githubusercontent.com/93275755/139739622-46f07bbc-1473-4f61-bc60-746f000c49bd.png)
+
+
+----
+
+**Density Violations**
+
+Density checks are suitable and intended to run on larger areas and full chips only, not on small local cells.  
+Slect toplevel cell using "i" then run in magic:  
+>cif cover MET1  
+>cif cover MET2  
+>cif cover MET3  
+etc
+
+resulting in output such this reporting metal density:
+
+![image](https://user-images.githubusercontent.com/93275755/139740122-b2fe05c9-7833-4229-9b8d-9720b01f01e9.png)
+
+to check compliance with actual foundry density rules, run this external python script from the pdk tree:  
+>/usr/share/pdk/sky130A/libs.tech/magic/check_density.py exercise_11.gds
+
+NOte that excercise_11.gds needs to be created upfront with  
+>gds write exercise_11
+
+We are then getting reults like these reported:  
+
+![image](https://user-images.githubusercontent.com/93275755/139741005-52d9845b-213d-4e27-b7ae-ba0ae65bf1aa.png)
+
+
+In order to fix these violations automatically in Sky130, we need to run another python script from the PDK:  
+>/usr/share/pdk/sky130A/libs.tech/magic/generate_fill.py exercise_11.gds  
+
+This results in a new gds file being generated **after a while** called exercise_11_fill_patten.gds  
+which contains the fill needed for the metals to be used in a DRC compliant way for the example above
+
+![image](https://user-images.githubusercontent.com/93275755/139741521-ef326843-6d2e-44e9-a1c5-bd5798686e66.png)
+
+To visualise only MET2 fill patterns issue the command >see m2fill   
+
+This shows the limited smarts of the auto metal fill script sind it tries to fill all metal to the max, 
+independent of the respective layer already being compliant upfront or not:  
+
+![image](https://user-images.githubusercontent.com/93275755/139741827-69f9a03a-ca0e-4fdb-8c00-4d4f6130af91.png)
+
+
+To merge the fill pattern with the orig layout do
+
+> load excercise_11
+> see *
+> box values 0,0,0,0
+> getcell exercise_11_fill_patten
+
+This merges the fillpattern and cell layout as we can verify by showing only m2 and m2fill layers:  
+> see m2,m2fill  
+
+![image](https://user-images.githubusercontent.com/93275755/139742194-d3db07dc-a545-4619-b268-8831e1122dbd.png)
+
+
+>cif cover m2_all
+
+now results in 92% coverage. Over-coverage needs to be fixed by manually removing metal.
+
+--------
+
+
+
+
+
 
 
 
