@@ -1109,6 +1109,71 @@ now results in 92% coverage. Over-coverage needs to be fixed by manually removin
 
 --------
 
+## Day4 Understanding Place&Route and Physical Verification
+
+### The OpenLane Flow
+
+OpenLane is a fully automated workflow for Synthesis, P&R, timing checks, optimisation to generate GDS from RTL and/or verilog inputs.
+
+**RTL to Gatelevel synthesis** is performed using: 
+* yosys for RTL synthesis (uing functional gates)  
+* ABC for mapping the ideal gates from yosys to real ones contained in the technology PDK
+
+Afterwards, **timing analysis** is performed using OpenSTA, using ideal clocks (ie no skew etc)
+
+**Floorplanning** will take care of:  
+* defining the core area of the macro  
+* placing I/O pins/ports
+* insertion of DCAPs and taps to substrate and wells  
+* power distribution network routing  
+
+**Placement stage**  
+* Global and local placement of design  
+* performs various optimizations (area, power, speed etc)
+* detailed local placement with true cells to validate global placement
+
+**Clock Tree Synthesis**
+* TritonCTS is being used  
+* creates real clock tree for distributing clock signals, incl buffering and fan-out optimization  
+* generating real clocks with skews and potential violations for setup/hold and others
+
+** Global Routing**
+* based on FastRoute Tool
+* Fill insertion using PDK supplied filler cells
+
+**Antenna Diode Insertion**
+* Automatic insertion if diodes to fix antenna errors 
+* DIODE_INSERTION_STRATEGY determines the results in detail based on setting 0..5 for this config variable:
+    0 = no diodes
+    1 = Spray Diodes
+    2 = Insert fakes first and place real ones only when needed
+    3 = Avoid Antenna Diode placements in FastRoute
+    4 = Sylvian script for insertion
+    5 = mix of 2 and 4
+    
+**Detailed Routing**
+* using Triton it routes all signal traces  
+* output is a 
+ - LEF file of the complete layout showing all metal obstructions and pins
+ - DEF file representing the complete layout
+
+**RC Parasitic Extraction**
+* performed in magic vlsi
+* this enables a full STA run with layout and cell parasitics taken into account
+
+**Ühysical Verification**
++ DRC & antenna checks in magic
++ DRC in KLayout
++ LVS using netgen
++ CVC - circuit validity checks
+
+**config.tcl**
+is the cnetral config file to control the elements of the complete RTL2GDS flow using OpenLANE.
+
+
+
+
+
 
 
 
